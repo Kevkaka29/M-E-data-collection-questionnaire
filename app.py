@@ -11,7 +11,9 @@ from google.oauth2.service_account import Credentials
 ADMIN_USERNAME = "Bigkev"
 ADMIN_PASSWORD = "kevlise"
 
-SERVICE_ACCOUNT_FILE = "service_account.json"
+from google.oauth2.service_account import Credentials
+creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"])
+
 GSHEET_NAME = "M&E_Soccer_Clubs_Responses"
 WORKSHEET_NAME = "responses"
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
@@ -19,8 +21,9 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapi
 # -------------- GOOGLE SHEETS UTILS --------------
 @st.cache_resource
 def get_gsheet_client():
-    creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-    return gspread.authorize(creds)
+    creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"])
+    client = gspread.authorize(creds)
+    return client
 
 def append_row_to_sheet(row: dict):
     client = get_gsheet_client()
@@ -347,3 +350,4 @@ if menu == "Fill Questionnaire":
     questionnaire()
 else:
     admin_page()
+
