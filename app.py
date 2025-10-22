@@ -19,7 +19,7 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapi
 # -------------- GOOGLE SHEETS UTILS --------------
 @st.cache_resource
 def get_gsheet_client():
-    creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+    creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=SCOPES)
     return gspread.authorize(creds)
 
 def append_row_to_sheet(row: dict):
