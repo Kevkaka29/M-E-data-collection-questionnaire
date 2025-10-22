@@ -301,7 +301,7 @@ def questionnaire():
                     st.markdown("""
                     ### 🎉 Thank You!
                     Your responses have been recorded successfully.  
-                    We sincerely appreciate your participation in this study.  
+                    I sincerely appreciate your participation in this study.  
                     Your honest feedback helps improve Monitoring & Evaluation practices  
                     in professional soccer clubs across Kenya.
                     
