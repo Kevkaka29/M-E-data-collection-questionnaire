@@ -11,24 +11,15 @@ from google.oauth2.service_account import Credentials
 ADMIN_USERNAME = "Bigkev"
 ADMIN_PASSWORD = "kevlise"
 
+SERVICE_ACCOUNT_FILE = "service_account.json"
 GSHEET_NAME = "M&E_Soccer_Clubs_Responses"
 WORKSHEET_NAME = "responses"
-
-import json
-from google.oauth2.service_account import Credentials
-
-# Load Google credentials securely from Streamlit Cloud Secrets
-SCOPES = [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive"
-]
-
-creds_dict = st.secrets["gcp_service_account"]
-creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
+SCOPES = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
 
 # -------------- GOOGLE SHEETS UTILS --------------
 @st.cache_resource
 def get_gsheet_client():
+    creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
     return gspread.authorize(creds)
 
 def append_row_to_sheet(row: dict):
@@ -294,14 +285,28 @@ def questionnaire():
         with col2:
             if st.button("Submit ✅"):
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                row = {"timestamp": timestamp, **st.session_state.answers,
-                       "q16_resources": "; ".join(resources) + (("; " + resources_other) if resources_other else ""),
-                       "q17_concrete_changes": q17, "q18_other_comments": q18}
+                row = {
+                    "timestamp": timestamp,
+                    **st.session_state.answers,
+                    "q16_resources": "; ".join(resources) + (("; " + resources_other) if resources_other else ""),
+                    "q17_concrete_changes": q17,
+                    "q18_other_comments": q18
+                }
 
                 try:
                     append_row_to_sheet(row)
-                    st.session_state.step = 6  # Move to thank-you page
-                    st.rerun()
+                    st.success("✅ Response submitted successfully to Google Sheets!")
+                    st.balloons()
+                    st.markdown("---")
+                    st.markdown("""
+                    ### 🎉 Thank You!
+                    Your responses have been recorded successfully.  
+                    We sincerely appreciate your participation in this study.  
+                    Your honest feedback helps improve Monitoring & Evaluation practices  
+                    in professional soccer clubs across Kenya.
+                    
+                    *You can now safely close this page.*
+                    """)
                 except Exception as e:
                     st.warning(f"⚠️ Google Sheets failed: {e}")
                     st.info("Saving locally as backup...")
@@ -312,8 +317,15 @@ def questionnaire():
                         if not file_exists:
                             writer.writeheader()
                         writer.writerow(row)
-                    st.session_state.step = 6
-                    st.rerun()
+                    st.success("✅ Response saved locally (backup).")
+                    st.balloons()
+                    st.markdown("---")
+                    st.markdown("""
+                    ### 🎉 Thank You!
+                    Your responses have been recorded locally.  
+                    Once connection resumes, your data will be uploaded automatically.  
+                    """)
+
 
     # ---------- THANK YOU PAGE ----------
     elif step == 6:
@@ -356,5 +368,3 @@ if menu == "Fill Questionnaire":
     questionnaire()
 else:
     admin_page()
-
-
